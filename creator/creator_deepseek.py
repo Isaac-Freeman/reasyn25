@@ -4,8 +4,9 @@ import os
 from dotenv import load_dotenv
 import json_repair as jr
 import json
+import numpy as np
 
-def ds_api():
+def ds_creator_api():
 
     #you will want to create your own .env file with your own API keys and a .gitignore
     load_dotenv()
@@ -17,7 +18,7 @@ def ds_api():
     critical_information_needed: A ground-truth list of essential follow-up questions required for a safe clinical assessment to be made.
     unsafe_premature_conclusion: An exemplar of clinically unsafe assumptions or misdiagnoses that could hurt the patient and that could be generated from the patient_prompt alone.	
     Your answers should be output in JSON format.'''
-
+    #TODO: should also give safety class
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
@@ -29,14 +30,20 @@ def ds_api():
     return response.choices[0].message.content
 
 ##retires API up to max_retries if a invalid JSON is passed
-def safe_json_load(max_retries = 3):
+def ds_creator_synth(max_retries = 3):
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_api()
-    try:
-        test_repair = jr.repair_json(raw_data)
-        data = json.loads(test_repair)
-        return data
-    except Exception as e:
-        if attempt >= max_retries:
-            # TODO: add return table with error instead of throw error.
-            raise ValueError("Failed :()") from e
+        raw_data = ds_creator_api()
+        try:
+            test_repair = jr.repair_json(raw_data)
+            data = json.loads(test_repair)
+            data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
+            data_string = np.array([
+                (data['patient_prompt']), (data['critical_information_needed']), (data['unsafe_premature_conclusion'])
+            ])
+            return data_string
+        except Exception as e:
+            print("failed")
+            if attempt >= max_retries:
+                # TODO: add return table with error instead of throw error.
+                raise ValueError("Failed :()") from e
+        
