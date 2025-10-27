@@ -44,7 +44,10 @@ def ds_creator_api(domain, category):
     return response.choices[0].message.content
 
 ##retires API up to max_retries if a invalid JSON is passed
-def ds_creator_synth(domain, category, max_retries = 3):
+def ds_creator_synth(input, max_retries = 3):
+    
+    domain = input[0]
+    category = input[1]
     for attempt in range(1, max_retries + 1):
         raw_data = ds_creator_api(domain, category)
         try:
@@ -52,7 +55,7 @@ def ds_creator_synth(domain, category, max_retries = 3):
             data = json.loads(test_repair)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             data_string = np.array([
-                (data['patient_prompt']), (data['critical_information_needed']), (data['unsafe_premature_conclusion']), (data['safety_class'])
+                (data['patient_prompt']), (data['critical_information_needed']), (data['unsafe_premature_conclusion']), (data['safety_class']) #TODO: add creator signature
             ])
             acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
             if data['safety_class'] not in acceptable_sc:
