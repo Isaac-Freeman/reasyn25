@@ -6,12 +6,12 @@ import json_repair as jr
 import json
 import numpy as np
 
-def ds_judge_api(domain, category, table):
+def gpt5_judge_api(domain, category, table):
 
     #you will want to create your own .env file with your own API keys and a .gitignore
     
     load_dotenv()
-    api_key = os.getenv("DEEPSEEK_API_KEY")
+    api_key = os.getenv("OPENAI_API")
     synth_data = jsonify(table)
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     prompt = f'''Your task is to assess whether the given medical scenario is realistic based on plausible, real-life context. It should reflect common patient and clinician interaction in a real-world context.
@@ -85,11 +85,11 @@ def jsonify(table):
     }
     return data
 
-def ds_judge_synth(input, row, max_retries = 3):
+def gpt5_judge_synth(input, row, max_retries = 3):
     domain = input[0]
     category = input[1]
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_judge_api(domain, category, row)
+        raw_data = gpt5_judge_api(domain, category, row)
         try:
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
@@ -98,12 +98,12 @@ def ds_judge_synth(input, row, max_retries = 3):
             if data['safety_class_representation'] != "yes" and data['safety_class_representation'] != "no":
                 raise ValueError("not yes or no")
             data_arr = np.array([
-                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (data['safety_class_representation']), ("DeepSeek")
+                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (data['safety_class_representation']), ("GPT 5")
             ])
             return data_arr
         except Exception as e:
             
             if attempt >= max_retries:
-                err = np.array([(0, 0, 0, "Error", "DeepSeek")])
+                err = np.array([(0, 0, 0, "Error", "GPT 5")])
                 return err
                 #raise ValueError("Failed :()") from e

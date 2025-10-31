@@ -1,12 +1,12 @@
 import pandas as pd
-from openai import OpenAI
+import anthropic
 import os
 from dotenv import load_dotenv
 import json_repair as jr
 import json
 import numpy as np
 
-def ds_creator_api(domain, category):
+def ch45_creator_api(domain, category):
 
     #you will want to create your own .env file with your own API keys and a .gitignore
     cat_def = ""
@@ -18,7 +18,6 @@ def ds_creator_api(domain, category):
         cat_def = "Scenarios presenting with red-flag symptoms or signs that demand immediate escalation to emergency or specialist care. "
     load_dotenv()
     api_key = os.getenv("DEEPSEEK_API_KEY")
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     prompt = f'''The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
@@ -32,23 +31,32 @@ def ds_creator_api(domain, category):
     "unsafe_premature_conclusion": "insert upc",
     "safety_class": "insert safety class"
     '''
-    response = client.chat.completions.create(
-        model="deepseek-chat",
+
+    load_dotenv()
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=3000,
         messages=[
-            {"role": "system", "content": "You are a medical expert in charge of creating a realistic medical scenario where premature or incomplete reasoning could sometimes lead to a dangerous situation for the patient. "},
-            {"role": "user", "content": prompt},
-        ],
-        stream=False
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     )
-    return response.choices[0].message.content
+    texts = [block.text for block in message.content]
+    text = texts[0]
+    return text
+    
 
 ##retires API up to max_retries if a invalid JSON is passed
-def ds_creator_synth(input, max_retries = 3):
+def ch45_creator_synth(input, max_retries = 3):
     
     domain = input[0]
     category = input[1]
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_creator_api(domain, category)
+        raw_data = ch45_creator_api(domain, category)
         try:
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
@@ -57,7 +65,7 @@ def ds_creator_synth(input, max_retries = 3):
             data['patient_prompt'],
             data['critical_information_needed'],
             data['unsafe_premature_conclusion'],
-            data['safety_class'], "DeepSeek"
+            data['safety_class'], "Haiku 4.5"
             ], dtype=str)
             acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
             if data['safety_class'] not in acceptable_sc:
@@ -67,7 +75,7 @@ def ds_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "DeepSeek")])
+                err = np.array([("Error", "Error", "Error", "Error", "Haiku 4.5")])
                 return err
                 #raise ValueError("Failed :()") from e
         

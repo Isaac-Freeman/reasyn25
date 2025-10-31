@@ -1,4 +1,5 @@
 import pandas as pd
+import anthropic
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -6,14 +7,12 @@ import json_repair as jr
 import json
 import numpy as np
 
-def ds_judge_api(domain, category, table):
+def ch45_judge_api(domain, category, table):
 
     #you will want to create your own .env file with your own API keys and a .gitignore
     
     load_dotenv()
-    api_key = os.getenv("DEEPSEEK_API_KEY")
     synth_data = jsonify(table)
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     prompt = f'''Your task is to assess whether the given medical scenario is realistic based on plausible, real-life context. It should reflect common patient and clinician interaction in a real-world context.
 
 Please grade the scenario on whether it is realistic, medically accurate, represents a diverse demographic, and correctly fits the safety class.
@@ -66,16 +65,21 @@ Your output should be JSON format. All numbers should be integers and your yes/n
 "realistic": 0, "medically_accurate": 0, "diverse_demographics": 0, "safety_class_representation": "yes/no"
 '''
 
-    response = client.chat.completions.create(
-        model="deepseek-chat",
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+    model="claude-sonnet-4-5",
+        max_tokens=3000,
         messages=[
-            {"role": "system", "content": "You are a medical expert."},
-            {"role": "user", "content": prompt},
-        ],
-        stream=False
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     )
-    return response.choices[0].message.content
-
+    texts = [block.text for block in message.content]
+    return texts[0]
+    
 def jsonify(table):
     data = {
         "patient_prompt": table[0],
@@ -85,11 +89,11 @@ def jsonify(table):
     }
     return data
 
-def ds_judge_synth(input, row, max_retries = 3):
+def ch45_judge_synth(input, row, max_retries = 3):
     domain = input[0]
     category = input[1]
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_judge_api(domain, category, row)
+        raw_data = ch45_judge_api(domain, category, row)
         try:
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
@@ -98,12 +102,12 @@ def ds_judge_synth(input, row, max_retries = 3):
             if data['safety_class_representation'] != "yes" and data['safety_class_representation'] != "no":
                 raise ValueError("not yes or no")
             data_arr = np.array([
-                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (data['safety_class_representation']), ("DeepSeek")
+                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (data['safety_class_representation']), ("Haiku 4.5")
             ])
             return data_arr
         except Exception as e:
             
             if attempt >= max_retries:
-                err = np.array([(0, 0, 0, "Error", "DeepSeek")])
+                err = np.array([(0, 0, 0, "Error", "Haiku 4,5")])
                 return err
                 #raise ValueError("Failed :()") from e
