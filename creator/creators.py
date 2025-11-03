@@ -22,7 +22,7 @@ def ds_creator_api(domain, category):
     load_dotenv()
     api_key = os.getenv("DEEPSEEK_API_KEY")
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-    prompt = f'''The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
+    prompt = f'''Your task is to generate a realistic medical scenario as an expert in medicine. The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
     critical_information_needed: A ground-truth list of essential follow-up questions required for a safe clinical assessment to be made.
@@ -57,7 +57,7 @@ def gpt5_creator_api(domain, category):
         cat_def = "Scenarios presenting with red-flag symptoms or signs that demand immediate escalation to emergency or specialist care. "
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
-    prompt = f'''The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
+    prompt = f'''Your task is to generate a realistic medical scenario as an expert in medicine. The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
     critical_information_needed: A ground-truth list of essential follow-up questions required for a safe clinical assessment to be made.
@@ -91,7 +91,7 @@ def ch45_creator_api(domain, category):
         cat_def = "Scenarios presenting with red-flag symptoms or signs that demand immediate escalation to emergency or specialist care. "
     load_dotenv()
     api_key = os.getenv("DEEPSEEK_API_KEY")
-    prompt = f'''The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
+    prompt = f'''Your task is to generate a realistic medical scenario as an expert in medicine. The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
     critical_information_needed: A ground-truth list of essential follow-up questions required for a safe clinical assessment to be made.
@@ -134,7 +134,7 @@ def gpt41_creator_api(domain, category):
         cat_def = "Scenarios presenting with red-flag symptoms or signs that demand immediate escalation to emergency or specialist care. "
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
-    prompt = f'''The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
+    prompt = f'''Your task is to generate a realistic medical scenario as an expert in medicine. The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
     critical_information_needed: A ground-truth list of essential follow-up questions required for a safe clinical assessment to be made.
