@@ -219,7 +219,7 @@ def gem25p_creator_api(domain, category):
         model="gemini-2.5-pro", contents=prompt
     )
 
-    print(response.text)
+    return response.text
 
 
 
@@ -341,7 +341,7 @@ def o3_creator_synth(input, max_retries = 3):
     domain = input[0]
     category = input[1]
     for attempt in range(1, max_retries + 1):
-        raw_data = gpto3_creator_api(domain, category)
+        raw_data = o3_creator_api(domain, category)
         try:
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)

@@ -8,7 +8,9 @@ import json_repair as jr
 import json
 import numpy as np
 
-
+def create_prompt(domain, shot, reasoning):
+    prompt = ""
+    
 def ds_creator_api(domain, category):
 
     #you will want to create your own .env file with your own API keys and a .gitignore
@@ -50,119 +52,5 @@ def ds_creator_api(domain, category):
 
 
 
-
-
-
-def ds_creator_synth(input, max_retries = 3):
-    
-    domain = input[0]
-    category = input[1]
-    for attempt in range(1, max_retries + 1):
-        raw_data = ds_creator_api(domain, category)
-        try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
-            data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
-            data_string = np.array([
-            data['patient_prompt'],
-            data['critical_information_needed'],
-            data['unsafe_premature_conclusion'],
-            data['safety_class'], "DeepSeek"
-            ], dtype=str)
-            acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
-            if data['safety_class'] not in acceptable_sc:
-                raise ValueError
-            return data_string
-        except Exception as e:
-            #print(test_repair)
-
-            if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "DeepSeek")])
-                return err
-                #raise ValueError("Failed :()") from e
-        
-def ch45_creator_synth(input, max_retries = 3):
-    
-    domain = input[0]
-    category = input[1]
-    for attempt in range(1, max_retries + 1):
-        raw_data = ch45_creator_api(domain, category)
-        try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
-            data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
-            data_string = np.array([
-            data['patient_prompt'],
-            data['critical_information_needed'],
-            data['unsafe_premature_conclusion'],
-            data['safety_class'], "Haiku 4.5"
-            ], dtype=str)
-            acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
-            if data['safety_class'] not in acceptable_sc:
-                raise ValueError
-            return data_string
-        except Exception as e:
-            #print(test_repair)
-
-            if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "Haiku 4.5")])
-                return err
-                #raise ValueError("Failed :()") from e
-        
-def gpt5_creator_synth(input, max_retries = 3):
-    
-    domain = input[0]
-    category = input[1]
-    for attempt in range(1, max_retries + 1):
-        raw_data = gpt5_creator_api(domain, category)
-        try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
-            data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
-            data_string = np.array([
-            data['patient_prompt'],
-            data['critical_information_needed'],
-            data['unsafe_premature_conclusion'],
-            data['safety_class'], "GPT 5"
-            ], dtype=str)
-            acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
-            if data['safety_class'] not in acceptable_sc:
-                raise ValueError
-            return data_string
-        except Exception as e:
-            #print(test_repair)
-
-            if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "GPT 5")])
-                return err
-                #raise ValueError("Failed :()") from e
-
-def gpt41_creator_synth(input, max_retries = 3):
-    
-    domain = input[0]
-    category = input[1]
-    for attempt in range(1, max_retries + 1):
-        raw_data = gpt41_creator_api(domain, category)
-        try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
-            data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
-            data_string = np.array([
-            data['patient_prompt'],
-            data['critical_information_needed'],
-            data['unsafe_premature_conclusion'],
-            data['safety_class'], "GPT 4.1"
-            ], dtype=str)
-            acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
-            if data['safety_class'] not in acceptable_sc:
-                raise ValueError
-            return data_string
-        except Exception as e:
-            #print(test_repair)
-
-            if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "GPT 4.1")])
-                return err
-                #raise ValueError("Failed :()") from e
 
 
