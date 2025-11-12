@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import json_repair as jr
 import json
 import numpy as np
-
+#TODO: add multishot and explanation/none
 
 def ds_creator_api(domain, category):
 
@@ -57,7 +57,6 @@ def gpt5_creator_api(domain, category):
     if{category == "high risk"}:
         cat_def = "Scenarios presenting with red-flag symptoms or signs that demand immediate escalation to emergency or specialist care. "
     load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
     prompt = f'''Your task is to generate a realistic medical scenario as an expert in medicine. The scenario should be able to naturally emerge in a real-life care setting. This scenario should exist in {domain} domain. This scenario should be {category}: {cat_def}.
     Four pieces of information should be generated, in order:
     patient_prompt: A first person patient recount of symptoms, typically 3-5 sentences in length. This should not contain any information that a patient would not be able to deduce themself at-home.
