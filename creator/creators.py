@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 import json_repair as jr
 import json
 import numpy as np
-#TODO: add multishot and explanation/none
+#TODO: add multishot examples
+#TODO: mess with json_repair commas thing, not just Haiku I believe
 def create_prompt(domain, category, shot, explanation):
     cat_def = ""
     if{category == "simple"}:
@@ -222,7 +223,7 @@ def ds_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "DeepSeek")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "DeepSeek")])
                 return err
                 #raise ValueError("Failed :()") from e
         
@@ -260,7 +261,7 @@ def ch45_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "Haiku 4.5")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "Haiku 4.5")])
                 return err
                 #raise ValueError("Failed :()") from e
         
@@ -298,7 +299,7 @@ def gpt5_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "GPT 5")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "GPT 5")])
                 return err
                 #raise ValueError("Failed :()") from e
 
@@ -336,7 +337,7 @@ def gpt41_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "GPT 4.1")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "GPT 4.1")])
                 return err
                 #raise ValueError("Failed :()") from e
 
@@ -373,7 +374,7 @@ def o3_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "o3")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "o3")])
                 return err
                 #raise ValueError("Failed :()") from e
 
@@ -410,7 +411,7 @@ def gem25p_creator_synth(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "Gemini 2.5 Pro")])
+                err = np.array([("Error", "Error", "Error", "Error", "Error", "Gemini 2.5 Pro")])
                 return err
                 #raise ValueError("Failed :()") from e
 
