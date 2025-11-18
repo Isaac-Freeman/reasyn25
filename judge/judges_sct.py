@@ -190,8 +190,8 @@ def sct_judge_synth(model, domain, row, max_retries = 3):
 #input data consists of domain and model
     for attempt in range(1, max_retries + 1):
         judge_func = get_model(model)
-        raw_data = judge_func(domain, row)
         try:
+            raw_data = judge_func(domain, row)
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
             if not all(0 <= data[key] <= 5 for key in ["realistic", "medically_accurate", "diverse_demographics"]):

@@ -9,7 +9,7 @@ import json_repair as jr
 import json
 import numpy as np
 #TODO: add multishot examples
-#TODO: mess with json_repair commas thing, not just Haiku I believe
+#TODO: change jr repair, force JSON output on K2, put api inside loop
 def create_prompt(domain, category, shot, explanation):
     cat_def = ""
     if{category == "simple"}:
@@ -50,7 +50,6 @@ def create_prompt(domain, category, shot, explanation):
 
 
 def ds_creator_api(domain, category, shot, explanation):
-
     #you will want to create your own .env file with your own API keys and a .gitignore
     cat_def = ""
     if{category == "simple"}:
@@ -233,10 +232,10 @@ def ds_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = ds_creator_api(domain, category, shot, explanation)
+            # test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -271,10 +270,10 @@ def cs45_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = cs45_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = cs45_creator_api(domain, category, shot, explanation)
+            # test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -308,10 +307,10 @@ def co41_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = cs45_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = cs45_creator_api(domain, category, shot, explanation)
+            # test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -346,48 +345,19 @@ def gpt5_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = gpt5_creator_api(domain, category, shot, explanation)
         try:
+            raw_data = gpt5_creator_api(domain, category, shot, explanation)
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
                 data['patient_prompt'],
-                data['critical_information_needed'],
-                data['unsafe_premature_conclusion'],
-                data['safety_class'], data['explanation'], "GPT 5"
-                ], dtype=str)
-            else:
-                data_string = np.array([
-                data['patient_prompt'],
-                data['critical_information_needed'],
-                data['unsafe_premature_conclusion'],
-                data['safety_class'], "", "GPT 5"
-                ], dtype=str)
-            acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate']
-            if data['safety_class'] not in acceptable_sc:
-                raise ValueError
-            return data_string
-        except Exception as e:
-            #print(test_repair)
-
-            if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "Error", "GPT 5")])
-                return err
-                #raise ValueError("Failed :()") from e
-
-def gpt41_creator_synth(input, max_retries = 3):
-    
-    domain = input[0]
-    category = input[1]
-    shot = input[2]
-    explanation = input[3]
-    for attempt in range(1, max_retries + 1):
+                data['critical_information_needed'], data['unsafe_premature_conclusion'], data['safety_class'], data['explanation'], "GPT 5" ], dtype=str) else: data_string = np.array([ data['patient_prompt'], data['critical_information_needed'], data['unsafe_premature_conclusion'], data['safety_class'], "", "GPT 5" ], dtype=str) acceptable_sc = ['safe to answer', 'requires more information', 'critical and must escalate'] if data['safety_class'] not in acceptable_sc: raise ValueError return data_string except Exception as e: #print(test_repair) if attempt >= max_retries: err = np.array([("Error", "Error", "Error", "Error", "Error", "GPT 5")]) return err #raise ValueError("Failed :()") from e def gpt41_creator_synth(input, max_retries = 3): domain = input[0] category = input[1] shot = input[2] explanation = input[3] for attempt in range(1, max_retries + 1):
         raw_data = gpt41_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            # test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -422,10 +392,10 @@ def k2_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = gpt41_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = gpt41_creator_api(domain, category, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -458,10 +428,10 @@ def o3_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = o3_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = o3_creator_api(domain, category, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([
@@ -495,10 +465,10 @@ def gem25p_creator_synth(input, max_retries = 3):
     shot = input[2]
     explanation = input[3]
     for attempt in range(1, max_retries + 1):
-        raw_data = gem25p_creator_api(domain, category, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = gem25p_creator_api(domain, category, shot, explanation)
+            # test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             data['critical_information_needed'] = ', '.join(data['critical_information_needed'])
             if(explanation == True):
                 data_string = np.array([

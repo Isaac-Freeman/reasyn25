@@ -41,7 +41,7 @@ def create_sct_prompt(domain, shot, explanation):
         '''
     textexpl = ""
     if(explanation == True):
-        textexpl = "Additionally, please provide a few sentences detailing why the subsequent findings were selected. Explain why the reasoning task provided is complex and could lead the clinician down different paths. Please provide your explanation in another line in the JSON with the key, 'explanation'."
+        textexpl = "Additionally, please provide a few sentences detailing why the subsequent findings were selected. Explain why the reasoning task provided is complex and could lead the clinician down different paths. Please provide your explanation in a final line in the JSON with the key, 'explanation'."
 
     prompt = f'''Your task is to generate a realistic medical scenario called a “script concordance testing.”  The scenario should consist of a base description of a patient’s symptoms, an initial diagnosis, and an augmenting follow-up discovery that could change the diagnosis. The scenario should be able to naturally emerge in a real-life care setting and focus on creating complex reasoning tasks for the assessing party.
     This scenario should exist in {domain} domain. Your output should contain only the requested information in a JSON. Here is an example of the JSON to be outputted.
@@ -51,7 +51,7 @@ def create_sct_prompt(domain, shot, explanation):
     Three pieces of information should be generated, in order:
     clinical_stem: 3 to 5 sentences containing a baseline scenario about the patient’s symptoms, medical history, and important demographic information. This can be a medically complex analysis with information an examining clinician could reasonably be expected to gather about a patient from a checkup, tests, and labs.    
     initial_thoughts: An initial ordering of tests, treatment, or diagnosis based upon the initial clinical stem. This should only be a few words or small sentences.
-    subsequent_finding: A follow-up finding made after the clinical stem and initial thoughts that may or may not augment the clinician’s thoughts about the patient’s treatment or diagnosis. This should force the clinician to consider the accuracy of their initial thoughts and present them with a complex medical reasoning problem.
+    subsequent_finding: A follow-up finding made after the clinical stem and initial thoughts that may or may not augment the clinician’s thoughts about the patient’s treatment or diagnosis. This should force the clinician to consider the accuracy of their initial thoughts and present them with a complex medical reasoning problem. These findings should not reference the initial diagnosis or tests and should exist independently from them. 
     {textexpl}
     {textshot}
     '''
@@ -79,7 +79,9 @@ def gpt5_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="gpt-5",
-        input=prompt)
+        input=prompt,
+        response_format={"type": "json_object"}
+    )
 
     return response.output_text
 def k2_creator_api_sct(domain, shot, explanation):
@@ -95,7 +97,8 @@ def k2_creator_api_sct(domain, shot, explanation):
         messages = [
             {"role": "system", "content": "You are a medical expert."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        response_format={"type": "json_object"}
     )
     return completion.choices[0].message.content
 
@@ -106,8 +109,9 @@ def gpt41_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="gpt-4.1",
-        input=prompt)
-
+        input=prompt,
+        response_format={"type": "json_object"}
+    )
     return response.output_text
 
 def o3_creator_api_sct(domain, shot, explanation):
@@ -117,7 +121,9 @@ def o3_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="o3",
-        input=prompt)
+        input=prompt,
+        response_format={"type": "json_object"}
+    )
 
     return response.output_text
 
@@ -182,10 +188,10 @@ def ds_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = ds_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = ds_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -215,10 +221,10 @@ def gpt5_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = gpt5_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = gpt5_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -247,10 +253,10 @@ def k2_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = k2_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = k2_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -280,10 +286,10 @@ def gpt41_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = gpt41_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = gpt41_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -313,10 +319,10 @@ def o3_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = o3_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = o3_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -345,10 +351,10 @@ def cs45_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = cs45_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = cs45_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -376,10 +382,10 @@ def co41_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = co41_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = co41_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -407,10 +413,10 @@ def gem25p_creator_synth_sct(input, max_retries = 3):
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = gem25p_creator_api_sct(domain, shot, explanation)
         try:
-            test_repair = jr.repair_json(raw_data)
-            data = json.loads(test_repair)
+            raw_data = gem25p_creator_api_sct(domain, shot, explanation)
+            #test_repair = jr.repair_json(raw_data)
+            data = json.loads(raw_data)
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
