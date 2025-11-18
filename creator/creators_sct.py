@@ -82,6 +82,22 @@ def gpt5_creator_api_sct(domain, shot, explanation):
         input=prompt)
 
     return response.output_text
+def k2_creator_api_sct(domain, shot, explanation):
+    load_dotenv()
+    prompt = create_sct_prompt(domain, shot, explanation)
+    api_key = os.getenv("MOONSHOT_API_KEY")
+    client = OpenAI(
+        api_key = api_key,
+        base_url = "https://api.moonshot.ai/v1",
+    )
+    completion = client.chat.completions.create(
+        model = "kimi-k2-thinking",
+        messages = [
+            {"role": "system", "content": "You are a medical expert."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return completion.choices[0].message.content
 
 def gpt41_creator_api_sct(domain, shot, explanation):
     load_dotenv()
@@ -105,7 +121,7 @@ def o3_creator_api_sct(domain, shot, explanation):
 
     return response.output_text
 
-def ch45_creator_api_sct(domain, shot, explanation):
+def cs45_creator_api_sct(domain, shot, explanation):
     load_dotenv()
     prompt = create_sct_prompt(domain, shot, explanation)
     client = OpenAI()
@@ -125,6 +141,25 @@ def ch45_creator_api_sct(domain, shot, explanation):
     text = texts[0]
     return text
 
+def co41_creator_api_sct(domain, shot, explanation):
+    load_dotenv()
+    prompt = create_sct_prompt(domain, shot, explanation)
+    client = OpenAI()
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model="claude-opus-4-1",
+        max_tokens=3000,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+    texts = [block.text for block in message.content]
+    text = texts[0]
+    return text
 def gem25p_creator_api_sct(domain, shot, explanation):
     load_dotenv()
     prompt = create_sct_prompt(domain, shot, explanation)
@@ -206,6 +241,38 @@ def gpt5_creator_synth_sct(input, max_retries = 3):
                 err = np.array([("Error", "Error", "Error", "Error", "GPT 5")])
                 return err
                 #raise ValueError("Failed :()") from e
+def k2_creator_synth_sct(input, max_retries = 3):
+    
+    domain = input[0]
+    shot = input[1]
+    explanation = input[2]
+    for attempt in range(1, max_retries + 1):
+        raw_data = k2_creator_api_sct(domain, shot, explanation)
+        try:
+            test_repair = jr.repair_json(raw_data)
+            data = json.loads(test_repair)
+            if explanation == True:
+                data_string = np.array([
+                data['clinical_stem'],
+                data['initial_thoughts'],
+                data['subsequent_finding'],
+                data['explanation'], "K2 Thinking"
+                ], dtype=str)
+            else:
+                data_string = np.array([
+                data['clinical_stem'],
+                data['initial_thoughts'],
+                data['subsequent_finding'],
+                "", "K2 Thinking"
+                ], dtype=str)
+            return data_string
+        except Exception as e:
+            #print(test_repair)
+
+            if attempt >= max_retries:
+                err = np.array([("Error", "Error", "Error", "Error", "K2 Thinking")])
+                return err
+                #raise ValueError("Failed :()") from e
 
 def gpt41_creator_synth_sct(input, max_retries = 3):
     
@@ -273,12 +340,12 @@ def o3_creator_synth_sct(input, max_retries = 3):
                 return err
                 #raise ValueError("Failed :()") from e
 
-def ch45_creator_synth_sct(input, max_retries = 3):
+def cs45_creator_synth_sct(input, max_retries = 3):
     domain = input[0]
     shot = input[1]
     explanation = input[2]
     for attempt in range(1, max_retries + 1):
-        raw_data = ch45_creator_api_sct(domain, shot, explanation)
+        raw_data = cs45_creator_api_sct(domain, shot, explanation)
         try:
             test_repair = jr.repair_json(raw_data)
             data = json.loads(test_repair)
@@ -287,14 +354,14 @@ def ch45_creator_synth_sct(input, max_retries = 3):
                 data['clinical_stem'],
                 data['initial_thoughts'],
                 data['subsequent_finding'],
-                data['explanation'], "Haiku 4.5"
+                data['explanation'], "Sonnet 4.5"
                 ], dtype=str)
             else:
                 data_string = np.array([
                 data['clinical_stem'],
                 data['initial_thoughts'],
                 data['subsequent_finding'],
-                "", "Haiku 4.5"
+                "", "Sonnet 4.5"
                 ], dtype=str)
             return data_string
         except Exception as e:
@@ -304,7 +371,37 @@ def ch45_creator_synth_sct(input, max_retries = 3):
                 err = np.array([("Error", "Error", "Error", "Error", "Haiku 4.5")])
                 return err
                 #raise ValueError("Failed :()") from e
+def co41_creator_synth_sct(input, max_retries = 3):
+    domain = input[0]
+    shot = input[1]
+    explanation = input[2]
+    for attempt in range(1, max_retries + 1):
+        raw_data = co41_creator_api_sct(domain, shot, explanation)
+        try:
+            test_repair = jr.repair_json(raw_data)
+            data = json.loads(test_repair)
+            if explanation == True:
+                data_string = np.array([
+                data['clinical_stem'],
+                data['initial_thoughts'],
+                data['subsequent_finding'],
+                data['explanation'], "Opus 4.1"
+                ], dtype=str)
+            else:
+                data_string = np.array([
+                data['clinical_stem'],
+                data['initial_thoughts'],
+                data['subsequent_finding'],
+                "", "Opus 4.1"
+                ], dtype=str)
+            return data_string
+        except Exception as e:
+            #print(test_repair)
 
+            if attempt >= max_retries:
+                err = np.array([("Error", "Error", "Error", "Error", "Opus 4.1")])
+                return err
+                #raise ValueError("Failed :()") from e
 def gem25p_creator_synth_sct(input, max_retries = 3):
     domain = input[0]
     shot = input[1]

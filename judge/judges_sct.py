@@ -10,8 +10,8 @@ import json_repair as jr
 import json
 import numpy as np
 
-def create_prompt_sct(domain, clinical_stem, initial_thoughts, subsequent_findings):
-    
+def create_sct_prompt(domain, row):
+    synth_data = jsonify(row)
     prompt = f'''
         Your task is to assess whether the given script concordance test is realistic based on plausible, real-life context. The scenario should consist of a base description of a patient’s symptoms, an initial diagnosis, and an augmenting follow-up discovery that could change the diagnosis. It should reflect a clinician workflow in a real-world context.
 
@@ -53,25 +53,38 @@ def create_prompt_sct(domain, clinical_stem, initial_thoughts, subsequent_findin
         subsequent_finding: A follow-up finding made after the clinical stem and initial thoughts that may or may not augment the clinician’s thoughts about the patient’s treatment or diagnosis. This should force the clinician to consider the accuracy of their initial thoughts and present them with a complex medical reasoning problem.
 
 
-        The entirety of the following information should be included in your analysis. The assigned medical area is {domain}. Here is the patient’s clinical stem {synth_data['clinical stem']}. Here is the initial diagnosis/treatment: {synth_data['initial_thoughts']} Here are the subsequent findings that might alter the initial treatment or diagnosis: {synth_data['subsequent_findings']}. This is all the data you should need to perform your evaluation.
+        The entirety of the following information should be included in your analysis. The assigned medical area is {domain}. Here is the patient’s clinical stem {synth_data['clinical_stem']}. Here is the initial diagnosis/treatment: {synth_data['initial_thoughts']} Here are the subsequent findings that might alter the initial treatment or diagnosis: {synth_data['subsequent_findings']}. This is all the data you should need to perform your evaluation.
+        
 
         Your output should be JSON format. All numbers should be integers. Here is an example:
         "realistic": 0, "medically_accurate": 0, "diverse_demographics": 0, 
         '''
     return prompt
 def gpt5_judge_api_sct(domain, row):
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     load_dotenv()
     client = OpenAI()
     response = client.responses.create(
         model="gpt-5",
         input=prompt)
-
-    return response.output_text
+def k2_judge_api_sct(domain, row):
+    prompt = create_sct_prompt(domain, row) 
+    load_dotenv()
+    api_key = os.getenv("MOONSHOT_API_KEY")
+    client = OpenAI(
+        api_key = api_key,
+        base_url = "https://api.moonshot.ai/v1",
+    )
+    completion = client.chat.completions.create(
+        model = "kimi-k2-thinking",
+        messages = [
+            {"role": "system", "content": "You are a medical expert."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return completion.choices[0].message.content
 def gpt41_judge_api_sct(domain, row):
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     load_dotenv()
     client = OpenAI()
     response = client.responses.create(
@@ -80,8 +93,7 @@ def gpt41_judge_api_sct(domain, row):
     return response.output_text
     
 def o3_judge_api_sct(domain, row):
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     load_dotenv()
     client = OpenAI()
     response = client.responses.create(
@@ -90,8 +102,7 @@ def o3_judge_api_sct(domain, row):
     return response.output_text
 def cs45_judge_api_sct(domain, row):
     api_key = os.getenv("ANTHROPIC_API_KEY")
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
     model="claude-sonnet-4-5",
@@ -105,10 +116,25 @@ def cs45_judge_api_sct(domain, row):
     )
     texts = [block.text for block in message.content]
     return texts[0]
+def co41_judge_api_sct(domain, row):
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    prompt = create_sct_prompt(domain, row) 
+    client = anthropic.Anthropic(api_key=api_key)
+    message = client.messages.create(
+    model="claude-opus-4-1",
+        max_tokens=3000,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+    texts = [block.text for block in message.content]
+    return texts[0]
 def gem25p_judge_api_sct(domain, row):
     load_dotenv()
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     client = genai.Client()
 
     response = client.models.generate_content(
@@ -120,17 +146,13 @@ def gem25p_judge_api_sct(domain, row):
 def ds_judge_api_sct(domain, row):
     load_dotenv()
     api_key = os.getenv("DEEPSEEK_API_KEY")
-    synth_data = jsonify(row)
-    prompt = create_sct_prompt(domain, synth_data) 
+    prompt = create_sct_prompt(domain, row) 
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
             {"role": "system", "content": "You are a medical expert."},
-            {"role": "user", "content": prompt},
-        ],
-        stream=False
-    )
+            {"role": "user", "content": prompt}, ], stream=False) 
     return response.choices[0].message.content
 def get_model(judge_name):
 # Returns a dictionary of judge functions.
@@ -140,19 +162,32 @@ def get_model(judge_name):
         "ds": ds_judge_api_sct,
         "cs45": cs45_judge_api_sct,
         "o3": o3_judge_api_sct,
-        "gem25p": gem25p_judge_api_sct
+        "gem25p": gem25p_judge_api_sct,
+        "co41": co41_judge_api_sct,
+        "k2": k2_judge_api_sct
     }
     return model[judge_name]
 def jsonify(table):
     data = {
         "clinical_stem": table[0],
         "initial_thoughts": table[1],
-        "subsequent_finding": table[2],
+        "subsequent_findings": table[2],
     }
     return data
-def sct_judge_synth(input, row, max_retries = 3):
-    domain = input[0]
-    model = input[1]
+def model_real_name(model_abr):
+    abr_dict = {
+        "gpt5": 'GPT 5',
+        "gpt41": 'GPT 4.1',
+        "ds": 'DeepSeek',
+        "cs45": "Claude Sonnet 4.5",
+        "o3": "o3", 
+        "gem25p": "Gemini 2.5 Pro",
+        "co41": "Claude Opus 4.1",
+        "k2": "K2 Thinking"
+    } 
+    return abr_dict[model_abr]
+def sct_judge_synth(model, domain, row, max_retries = 3):
+#input data consists of domain and model
     for attempt in range(1, max_retries + 1):
         judge_func = get_model(model)
         raw_data = judge_func(domain, row)
@@ -162,13 +197,13 @@ def sct_judge_synth(input, row, max_retries = 3):
             if not all(0 <= data[key] <= 5 for key in ["realistic", "medically_accurate", "diverse_demographics"]):
                 raise ValueError("greater than 5 or less than 0")
             data_arr = np.array([
-                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (model)
-            ])
+                (data['realistic']), (data['medically_accurate']), (data['diverse_demographics']), (model_real_name(model))
+            ], dtype=str)
             return data_arr
         except Exception as e:
             
             if attempt >= max_retries:
-                err = np.array([(0, 0, 0, "Error", model)])
+                err = np.array([(0, 0, 0, model_real_name(model))])
                 return err
                 #raise ValueError("Failed :()") from e
 
