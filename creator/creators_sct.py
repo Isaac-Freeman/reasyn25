@@ -79,8 +79,7 @@ def gpt5_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="gpt-5",
-        input=prompt,
-        response_format={"type": "json_object"}
+        input=prompt
     )
 
     return response.output_text
@@ -109,8 +108,7 @@ def gpt41_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="gpt-4.1",
-        input=prompt,
-        response_format={"type": "json_object"}
+        input=prompt
     )
     return response.output_text
 
@@ -121,8 +119,7 @@ def o3_creator_api_sct(domain, shot, explanation):
 
     response = client.responses.create(
         model="o3",
-        input=prompt,
-        response_format={"type": "json_object"}
+        input=prompt
     )
 
     return response.output_text
@@ -191,7 +188,7 @@ def ds_creator_synth_sct(input, max_retries = 3):
         try:
             raw_data = ds_creator_api_sct(domain, shot, explanation)
             #test_repair = jr.repair_json(raw_data)
-            data = json.loads(raw_data)
+            data = json.loads(raw_data[8:-3])
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -354,7 +351,7 @@ def cs45_creator_synth_sct(input, max_retries = 3):
         try:
             raw_data = cs45_creator_api_sct(domain, shot, explanation)
             #test_repair = jr.repair_json(raw_data)
-            data = json.loads(raw_data)
+            data = json.loads(raw_data[8:-3])
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -374,7 +371,7 @@ def cs45_creator_synth_sct(input, max_retries = 3):
             #print(test_repair)
 
             if attempt >= max_retries:
-                err = np.array([("Error", "Error", "Error", "Error", "Haiku 4.5")])
+                err = np.array([("Error", "Error", "Error", "Error", "Sonnet 4.5")])
                 return err
                 #raise ValueError("Failed :()") from e
 def co41_creator_synth_sct(input, max_retries = 3):
@@ -385,7 +382,7 @@ def co41_creator_synth_sct(input, max_retries = 3):
         try:
             raw_data = co41_creator_api_sct(domain, shot, explanation)
             #test_repair = jr.repair_json(raw_data)
-            data = json.loads(raw_data)
+            data = json.loads(raw_data[8:-3])
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],
@@ -416,7 +413,7 @@ def gem25p_creator_synth_sct(input, max_retries = 3):
         try:
             raw_data = gem25p_creator_api_sct(domain, shot, explanation)
             #test_repair = jr.repair_json(raw_data)
-            data = json.loads(raw_data)
+            data = json.loads(raw_data[8:-3])
             if explanation == True:
                 data_string = np.array([
                 data['clinical_stem'],

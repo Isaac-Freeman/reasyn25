@@ -67,6 +67,7 @@ def gpt5_judge_api_sct(domain, row):
     response = client.responses.create(
         model="gpt-5",
         input=prompt)
+    return response.output_text
 def k2_judge_api_sct(domain, row):
     prompt = create_sct_prompt(domain, row) 
     load_dotenv()
