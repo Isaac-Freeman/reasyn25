@@ -1,0 +1,10 @@
+Example of .env file, delete this line if copied for .env. There should be no spaces in any of the below lines.
+DEEPSEEK_API_KEY=#######
+
+OPENAI_API_KEY=#######
+
+ANTHROPIC_API_KEY=########
+
+GEMINI_API_KEY=#######
+
+MOONSHOT_API_KEY=########

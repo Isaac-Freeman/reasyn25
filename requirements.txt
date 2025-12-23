@@ -1,0 +1,7 @@
+anthropic==0.75.0
+json_repair==0.53.0
+numpy==2.4.0
+openai==2.14.0
+pandas==2.3.3
+protobuf==6.33.2
+python-dotenv==1.2.1

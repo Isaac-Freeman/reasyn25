@@ -15,20 +15,14 @@ primarily through the provided **IPYNB driver notebooks**.
 
 ------------------------------------------------------------------------
 
-## Pipeline Overview
-
-![Pipeline Figure](figures/ReaSyn%20Flow.png "Pipeline Example Figure")
-
-------------------------------------------------------------------------
-
 ## Currently Implemented Models
 
 -   **GPT-4.1**
--   **GPT-5** *(with GPT-5.1 support coming soon)*
+-   **GPT-5**
 -   **OpenAI o3**
 -   **DeepSeek Chat 3.2**
 -   **Claude Sonnet 4.5**
--   **Gemini 2.5 Pro** *(Gemini 3 support coming soon)*
+-   **Gemini 2.5 Pro**
 -   **Claude Opus 4.1**
 -   **Kimi K2 Thinking**
 
